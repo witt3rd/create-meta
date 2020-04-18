@@ -1,12 +1,12 @@
 #!/bin/sh
-":"; //# comment; exec /usr/bin/env node --harmony "$0" "$@"
+":"; //# comment; exec /usr/bin/env node "$0" "$@"
 
-import fs from "fs";
+const fs = require("fs");
 const fsPromises = fs.promises;
-import process from "process";
-import path from "path";
-import gitconfig from "gitconfig";
-import commandLineArgs from "command-line-args";
+const process = require("process");
+const path = require("path");
+const gitconfig = require("gitconfig");
+const commandLineArgs = require("command-line-args");
 
 const optionDefinitions = [
   { name: "root", type: String, defaultOption: true, defaultValue: "." },
@@ -72,7 +72,8 @@ const visitRepo = async (dir) => {
   });
 
   // extract just what we need and emit if it exists
-  const repo = config?.remote?.origin?.url;
+  const repo =
+    config && config.remote && config.remote.origin && config.remote.origin.url;
   if (repo) {
     const relDir = dir.replace(options.root, "");
     result.meta.projects[relDir] = repo;
