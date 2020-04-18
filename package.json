@@ -1,6 +1,6 @@
 {
   "name": "create-meta",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate a .meta file for use with meta repos from an existing directory hierarchy",
   "bin": {
     "create-meta": "index.js"
