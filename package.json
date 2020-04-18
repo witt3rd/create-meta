@@ -1,7 +1,7 @@
 {
   "name": "meta-create",
   "version": "1.0.0",
-  "description": "",
+  "description": "Generate a .meta file for use with meta repos from an existing directory hierarchy",
   "bin": {
     "meta-create": "index.js"
   },
@@ -12,6 +12,13 @@
   "keywords": [],
   "author": "Donald Thompson <witt3rd@witt3rd.com> (http://witt3rd.com/)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/witt3rd/meta-create.git"
+  },
+  "bugs": {
+    "url": "https://github.com/witt3rd/meta-create/issues"
+  },
   "dependencies": {
     "command-line-args": "^5.1.1",
     "gitconfig": "^2.0.8"
