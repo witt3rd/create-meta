@@ -1,4 +1,5 @@
-#!/usr/bin/env node --harmony
+#!/bin/sh
+":"; //# comment; exec /usr/bin/env node --harmony "$0" "$@"
 
 import fs from "fs";
 const fsPromises = fs.promises;
@@ -73,9 +74,10 @@ const visitRepo = async (dir) => {
   // extract just what we need and emit if it exists
   const repo = config?.remote?.origin?.url;
   if (repo) {
-    result.meta.projects[dir] = repo;
-    result.gitignore.add(dir);
-    if (options.verbose) console.log(`  \"${dir}\": \"${repo}\"`);
+    const relDir = dir.replace(options.root, "");
+    result.meta.projects[relDir] = repo;
+    result.gitignore.add(relDir);
+    if (options.verbose) console.log(`  \"${relDir}\": \"${repo}\"`);
   }
 };
 
@@ -99,13 +101,14 @@ const visitRepo = async (dir) => {
   // recurse
   await visitDir(options.root);
 
-  // write files
-  if (options.verbose) console.log("Writing", metaFile);
-  await fsPromises.writeFile(metaFile, JSON.stringify(result.meta, null, 2));
-  if (options.verbose) console.log("Writing", gitignoreFile);
-  await fsPromises.writeFile(
-    gitignoreFile,
-    [...result.gitignore].map((x) => x.replace(options.root, "")).join("\n")
-  );
-  console.log("\nDone");
+  const numProjects = Object.keys(result.meta.projects).length;
+  if (numProjects) {
+    // write files
+    if (options.verbose) console.log("Writing", metaFile);
+    await fsPromises.writeFile(metaFile, JSON.stringify(result.meta, null, 2));
+    if (options.verbose) console.log("Writing", gitignoreFile);
+    await fsPromises.writeFile(gitignoreFile, [...result.gitignore].join("\n"));
+  }
+
+  console.log(`\nDone (${numProjects} projects)`);
 })();
