@@ -1,0 +1,18 @@
+{
+  "name": "meta-creator",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --harmony index.js"
+  },
+  "keywords": [],
+  "author": "Donald Thompson <witt3rd@witt3rd.com> (http://witt3rd.com/)",
+  "license": "MIT",
+  "dependencies": {
+    "command-line-args": "^5.1.1",
+    "gitconfig": "^2.0.8"
+  },
+  "devDependencies": {}
+}
