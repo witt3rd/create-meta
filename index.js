@@ -15,7 +15,7 @@ const optionDefinitions = [
 ];
 // parse command line
 const options = commandLineArgs(optionDefinitions);
-options.root = path.resolve(options.root);
+options.root = path.resolve(options.root) + "/";
 if (options.verbose) console.log(options);
 
 const Blacklist = ["_archive", "node_modules"];
