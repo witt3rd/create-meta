@@ -26,5 +26,5 @@ meta-create [--force] [--verbose] <root = .>
 
 ```bash
 npm version 1.0.0-beta.0
-npm publish --tage beta
+npm publish --tag beta
 ```
