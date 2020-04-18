@@ -1,5 +1,4 @@
-#!/bin/sh
-":"; //# comment; exec /usr/bin/env node "$0" "$@"
+#!/usr/bin/env node
 
 const fs = require("fs");
 const fsPromises = fs.promises;
