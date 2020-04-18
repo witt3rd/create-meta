@@ -1,8 +1,10 @@
 {
-  "name": "meta-creator",
+  "name": "meta-create",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "bin": {
+    "meta-create": "index.js"
+  },
   "type": "module",
   "scripts": {
     "start": "node --harmony index.js"

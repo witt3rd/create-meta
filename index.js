@@ -1,61 +1,111 @@
+#!/usr/bin/env node --harmony
+
 import fs from "fs";
 const fsPromises = fs.promises;
 import process from "process";
 import path from "path";
 import gitconfig from "gitconfig";
+import commandLineArgs from "command-line-args";
 
-const BlackList = ["_archive", "node_modules"];
-const meta = {
-  ignore: [".git", ".vscode", "node_modules"],
-  projects: {},
+const optionDefinitions = [
+  { name: "root", type: String, defaultOption: true, defaultValue: "." },
+  { name: "verbose", alias: "v", type: Boolean },
+  { name: "force", alias: "f", type: Boolean },
+];
+// parse command line
+const options = commandLineArgs(optionDefinitions);
+options.root = path.resolve(options.root);
+if (options.verbose) console.log(options);
+
+const Blacklist = ["_archive", "node_modules"];
+
+// Global mutable result (yes, I know)
+const result = {
+  meta: {
+    ignore: [".git", ".vscode", "node_modules"],
+    projects: {},
+  },
+  gitignore: new Set(),
 };
 
-(async () => {
-  // recursive function to traverse directory hierarchy looking for git repos
-  const visitDir = async (root) => {
-    // console.log("dir", root);
-    try {
-      const entries = (await fsPromises.readdir(root)).filter(
-        (e) => !BlackList.includes(e)
-      );
-      const dirs = [];
-      for (let entry of entries) {
-        if (entry === ".git") {
-          await visitRepo(root);
-          continue;
-        }
-        const fullPath = path.join(root, entry);
-        const stat = await fsPromises.lstat(fullPath);
-        if (stat.isDirectory()) {
-          dirs.push(fullPath);
-        }
+// recursive function to traverse directory hierarchy looking for git repos
+const visitDir = async (root) => {
+  options.verbose ? console.log("visitDir", root) : process.stdout.write(".");
+  try {
+    const entries = await fsPromises.readdir(root);
+
+    const dirs = [];
+    for (let entry of entries) {
+      if (Blacklist.includes(entry)) {
+        result.gitignore.add(`${entry}/`);
+        continue;
       }
-      for (let dir of dirs) await visitDir(dir);
-    } catch (err) {
-      console.error(`Error occured while reading directory ${root}:`, err);
+
+      // ignore root dir
+      if (entry === ".git" && root !== options.root) {
+        await visitRepo(root);
+        continue;
+      }
+      const fullPath = path.join(root, entry);
+
+      const stat = await fsPromises.lstat(fullPath);
+      if (stat.isDirectory()) {
+        dirs.push(fullPath);
+      }
     }
-  };
+    for (let dir of dirs) await visitDir(dir);
+  } catch (err) {
+    console.error(`Error occured while reading directory ${root}:`, err);
+  }
+};
 
-  const visitRepo = async (dir) => {
-    process.chdir(dir);
-    const config = await gitconfig.get({
-      location: "local",
-    });
-    const repo = config?.remote?.origin?.url;
-    if (repo) {
-      meta.projects[dir] = repo;
-      console.log(`${dir}: ${repo}`);
+// called for every .git directory found
+const visitRepo = async (dir) => {
+  options.verbose ? console.log("visitRepo", dir) : process.stdout.write("*");
+  // change to the directory, since the git-config module works relative to the .git repo
+  process.chdir(dir);
+
+  // get all the values
+  const config = await gitconfig.get({
+    location: "local",
+  });
+
+  // extract just what we need and emit if it exists
+  const repo = config?.remote?.origin?.url;
+  if (repo) {
+    result.meta.projects[dir] = repo;
+    result.gitignore.add(dir);
+    if (options.verbose) console.log(`  \"${dir}\": \"${repo}\"`);
+  }
+};
+
+//
+// Main
+//
+(async () => {
+  // output files
+  const metaFile = path.join(options.root, ".meta");
+  const gitignoreFile = path.join(options.root, ".gitignore");
+
+  // don't overwrite existing result files, unless --force
+  if (!options.force) {
+    if (fs.existsSync(metaFile) || fs.existsSync(gitignoreFile)) {
+      console.log(
+        "To overwite existing .meta and .gitgnore files, use -f or --force option"
+      );
+      return;
     }
-  };
-
-  // preserve current dir
-  const startDir = process.cwd();
-
+  }
   // recurse
-  await visitDir(path.resolve("/Users/donald/src/witt3rd"));
+  await visitDir(options.root);
 
-  // restore current dir
-  process.chdir(startDir);
-
-  console.log(meta);
+  // write files
+  if (options.verbose) console.log("Writing", metaFile);
+  await fsPromises.writeFile(metaFile, JSON.stringify(result.meta, null, 2));
+  if (options.verbose) console.log("Writing", gitignoreFile);
+  await fsPromises.writeFile(
+    gitignoreFile,
+    [...result.gitignore].map((x) => x.replace(options.root, "")).join("\n")
+  );
+  console.log("\nDone");
 })();
