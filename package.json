@@ -1,22 +1,22 @@
 {
-  "name": "meta-create",
-  "version": "1.0.5",
+  "name": "create-meta",
+  "version": "1.0.0",
   "description": "Generate a .meta file for use with meta repos from an existing directory hierarchy",
   "bin": {
-    "meta-create": "index.js"
+    "create-meta": "index.js"
   },
   "scripts": {
-    "start": "node --harmony index.js"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "Donald Thompson <witt3rd@witt3rd.com> (http://witt3rd.com/)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/witt3rd/meta-create.git"
+    "url": "https://github.com/witt3rd/create-meta.git"
   },
   "bugs": {
-    "url": "https://github.com/witt3rd/meta-create/issues"
+    "url": "https://github.com/witt3rd/create-meta/issues"
   },
   "dependencies": {
     "command-line-args": "^5.1.1",
