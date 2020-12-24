@@ -34,6 +34,15 @@ const visitDir = async (root) => {
   try {
     const entries = await fsPromises.readdir(root);
 
+    // special-case: ignore nested meta repos
+    if (entries.includes(".meta") && root !== options.root) {
+      options.verbose
+        ? console.log("nested meta", root)
+        : process.stdout.write("M");
+      result.gitignore.add(`${root.substr(options.root.length)}`);
+      return;
+    }
+
     const dirs = [];
     for (let entry of entries) {
       if (Blacklist.includes(entry)) {
